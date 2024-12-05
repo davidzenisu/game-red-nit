@@ -1,74 +1,87 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import React, { useState } from "react";
+import CardItem from "@/components/swiper/CardItem";
+import Swiper from "react-native-deck-swiper";
+import ParallaxScrollView from "@/components/ParallaxScrollView";
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { StyleSheet, useColorScheme } from 'react-native';
+import { ThemedView } from "@/components/ThemedView";
+import { DictionaryRecord } from "@/assets/data/dictionary";
+import { randomList } from "@/computation/random";
+import WORDS from "@/assets/data/dictionary";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+export default function SwipeScreen() {
+  const [swiper, setSwiper] = useState<Swiper<DictionaryRecord> | null>(null);
 
-export default function HomeScreen() {
+  function swipe(direction: "up" | "down" | "left" | "right") {
+    switch (direction) {
+      case "up":
+        swiper?.swipeTop();
+        break;
+      case "down":
+        swiper?.swipeBottom();
+        break;
+      case "left":
+        swiper?.swipeLeft();
+        break;
+      case "right":
+        swiper?.swipeRight();
+        break;
+    }
+  }
+
+  const colorScheme = useColorScheme() ?? 'light';
+  const headerBackgroundColor = { light: '#D0D0D0', dark: '#353636' };
+
+  const randomWords = randomList(WORDS)
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <ThemedView>
+      <ParallaxScrollView
+        headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
+        headerImage={<Ionicons size={310} name="book" style={styles.headerImage} />}>
+      </ParallaxScrollView>
+      <Swiper
+        ref={(newSwiper): void => setSwiper(newSwiper)}
+        cards={WORDS}
+        renderCard={(item) => {
+          return (
+            <CardItem
+              hasActions
+              image={require('@/assets/images/react-logo.png')}
+              name={item.word}
+              description={item.meaning}
+              matches={'10'}
+              swipeRight={() => { swipe("right") }}
+              swipeLeft={() => { swipe("left") }}
+              swipeTop={() => { swipe("up") }}
+              swipeBottom={() => { swipe("down") }}
+            />
+          )
+        }}
+        infinite={true}
+        onSwiped={(cardIndex) => { console.log(cardIndex); }}
+        onSwipedAll={() => { console.log('onSwipedAll') }}
+        cardIndex={0}
+        backgroundColor={headerBackgroundColor[colorScheme]}
+        stackSize={3}>
+      </Swiper>
+    </ThemedView >
   );
-}
+};
 
 const styles = StyleSheet.create({
+  headerImage: {
+    color: '#808080',
+    bottom: -90,
+    left: -35,
+    position: 'absolute',
+  },
+  header: {
+    height: 250,
+    overflow: 'hidden',
+  },
   titleContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
     gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
   },
 });
